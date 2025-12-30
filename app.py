@@ -131,7 +131,7 @@ Rules:
 
 
 # -------------------- STREAMLIT UI --------------------
-st.title("🤖 A&D Chatbot")
+st.title("🧠 A&D Chatbot")
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
@@ -161,6 +161,7 @@ if user_input:
 
 
     st.session_state.messages.append({"role": "assistant", "content": answer})
+
 
 
 
