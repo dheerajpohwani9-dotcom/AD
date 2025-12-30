@@ -7,7 +7,7 @@ import datetime
 st.set_page_config(page_title="A&D Chatbot", layout="centered")
 
 GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
-PDF_PATH = "companypolicys.pdf"
+PDF_PATH = "comapanypolicys.pdf"
 MODEL_NAME = "llama-3.1-8b-instant"
 
 
@@ -161,5 +161,6 @@ if user_input:
 
 
     st.session_state.messages.append({"role": "assistant", "content": answer})
+
 
 
