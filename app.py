@@ -7,7 +7,7 @@ import datetime
 st.set_page_config(page_title="A&D Chatbot", layout="centered")
 
 GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
-PDF_PATH = "Zeeshan_Chatbot_Company_Manual.pdf"
+PDF_PATH = "companypolicys.pdf"
 MODEL_NAME = "llama-3.1-8b-instant"
 
 
@@ -103,7 +103,7 @@ Rules:
     else:
         # PDF has useful context → use it first, but allow updated info too
         system_prompt = f"""
-You are Z&J ka Chatbot.
+You are A&D Chatbot.
 
 Use the following PDF text as your main reference. 
 If updated information (today = {today}) is needed, include it naturally.
@@ -131,13 +131,13 @@ Rules:
 
 
 # -------------------- STREAMLIT UI --------------------
-st.title("🤖 Z&J ka Chatbot")
+st.title("🤖 A&D Chatbot")
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {"role": "assistant",
-         "content": "Assalam o Alaikum! 👋 Main Z&J ka Chatbot hoon. "
-                    "Jo Bhi Phouchna Bindaas Phoucho Mai Ho Na Apki Madad Kay Liye"}
+         "content": "HEY! 👋 A&D Chatbot here . "
+                    "How Can I Help You"}
     ]
 
 # Display chat messages
@@ -146,7 +146,7 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # User input
-user_input = st.chat_input("Apna sawal likho...")
+user_input = st.chat_input("Ask Something...")
 
 if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
@@ -155,10 +155,11 @@ if user_input:
         st.markdown(user_input)
 
     with st.chat_message("assistant"):
-        with st.spinner("Soch raha hoon..."):
+        with st.spinner("Thinking..."):
             answer = get_answer(user_input, st.session_state.messages)
         st.markdown(answer)
 
 
     st.session_state.messages.append({"role": "assistant", "content": answer})
+
 
