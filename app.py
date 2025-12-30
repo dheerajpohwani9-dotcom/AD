@@ -4,7 +4,7 @@ import requests
 import datetime
 
 # -------------------- BASIC SETUP --------------------
-st.set_page_config(page_title="Z&J ka Chatbot", layout="centered")
+st.set_page_config(page_title="A&D Chatbot", layout="centered")
 
 GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 PDF_PATH = "Zeeshan_Chatbot_Company_Manual.pdf"
@@ -161,3 +161,4 @@ if user_input:
 
 
     st.session_state.messages.append({"role": "assistant", "content": answer})
+
