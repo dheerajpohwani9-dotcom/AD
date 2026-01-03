@@ -6,7 +6,7 @@ import datetime
 # ================= PAGE CONFIG =================
 st.set_page_config(
     page_title="Afaque & Dheeraj Chatbot",
-    page_icon="🦄",
+    page_icon="🤖",
     layout="centered",
     initial_sidebar_state="expanded"
 )
@@ -52,7 +52,6 @@ st.markdown("""
     border-radius: 15px;
     color: white;
 }
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -60,21 +59,21 @@ st.markdown("""
 with st.sidebar:
     st.markdown("<div class='sidebar-box'>", unsafe_allow_html=True)
     st.markdown("## 🤖 Afaque & Dheeraj")
-    st.markdown("### ✨ Smart AI Chatbot")
+    st.markdown("### Smart AI Chatbot")
     st.markdown("---")
-    st.markdown("📘 **PDF Brain**")
-    st.markdown("⚡ **Groq LLaMA 3**")
-    st.markdown("🎨 **Colorful UI**")
-    st.markdown("🚀 **Fast & Smart**")
+    st.markdown("📄 PDF-Based Knowledge")
+    st.markdown("⚡ Powered by Groq (LLaMA 3)")
+    st.markdown("🎨 Colorful Modern UI")
+    st.markdown("🚀 Fast & Reliable")
     st.markdown("---")
-    st.markdown("💡 *Ask freely. Get smart answers.*")
+    st.markdown("💡 Ask clearly. Get smart answers.")
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ================= HEADER =================
 st.markdown("""
 <div class="header-box">
-    <div class="header-title">🦄 Afaque & Dheeraj Chatbot</div>
-    <div class="header-sub">✨ Colourful • Smart • AI Powered • PDF Aware ✨</div>
+    <div class="header-title">🤖 Afaque & Dheeraj Chatbot</div>
+    <div class="header-sub">Colorful • Intelligent • AI-Powered • PDF-Aware</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -89,22 +88,22 @@ def load_chunks(max_chars=600):
     text = ""
     with pdfplumber.open(PDF_PATH) as pdf:
         for page in pdf.pages:
-            t = page.extract_text()
-            if t:
-                text += t + "\n"
+            content = page.extract_text()
+            if content:
+                text += content + "\n"
 
     parts = [p.strip() for p in text.split("\n") if p.strip()]
-    chunks, buf = [], ""
+    chunks, buffer = [], ""
 
-    for p in parts:
-        if len(buf) + len(p) <= max_chars:
-            buf += " " + p
+    for part in parts:
+        if len(buffer) + len(part) <= max_chars:
+            buffer += " " + part
         else:
-            chunks.append(buf.strip())
-            buf = p
+            chunks.append(buffer.strip())
+            buffer = part
 
-    if buf:
-        chunks.append(buf.strip())
+    if buffer:
+        chunks.append(buffer.strip())
 
     return chunks
 
@@ -112,19 +111,19 @@ pdf_chunks = load_chunks()
 
 # ================= RETRIEVAL =================
 def retrieve_context(query, top_k=3):
-    q = set(query.lower().split())
-    scored = []
+    query_words = set(query.lower().split())
+    scored_chunks = []
 
-    for ch in pdf_chunks:
-        score = len(q & set(ch.lower().split()))
-        if score:
-            scored.append((score, ch))
+    for chunk in pdf_chunks:
+        score = len(query_words & set(chunk.lower().split()))
+        if score > 0:
+            scored_chunks.append((score, chunk))
 
-    if not scored:
+    if not scored_chunks:
         return ""
 
-    scored.sort(reverse=True)
-    return "\n\n".join([c for _, c in scored[:top_k]])
+    scored_chunks.sort(reverse=True)
+    return "\n\n".join([c for _, c in scored_chunks[:top_k]])
 
 # ================= GROQ API =================
 def llama_chat(messages):
@@ -139,13 +138,13 @@ def llama_chat(messages):
         "temperature": 0.4,
     }
 
-    r = requests.post(url, json=payload, headers=headers)
-    data = r.json()
+    response = requests.post(url, json=payload, headers=headers)
+    data = response.json()
 
     try:
         return data["choices"][0]["message"]["content"]
     except:
-        return "🚨 **Oops! Groq API Error**\n\n" + str(data)
+        return "🚨 Groq API Error:\n" + str(data)
 
 # ================= ANSWER LOGIC =================
 def get_answer(question, history):
@@ -154,24 +153,26 @@ def get_answer(question, history):
 
     if len(context.strip()) < 50:
         system_prompt = f"""
-You are 🌈 **Afaque & Dheeraj Chatbot**.
+You are **Afaque & Dheeraj Chatbot**.
 
 Rules:
-- Be friendly, colourful, and confident.
-- Use updated knowledge (today: {today}).
-- Never say you are searching or outdated.
+- Respond in clear, professional English only.
+- Use updated general knowledge (today: {today}).
+- Never mention searching, browsing, or knowledge cutoffs.
 """
     else:
         system_prompt = f"""
-You are 🌈 **Afaque & Dheeraj Chatbot**.
+You are **Afaque & Dheeraj Chatbot**.
 
-Use this PDF context smartly and add updated info if needed.
+Use the following PDF context as the primary source.
+Include updated information when relevant.
 
 PDF Context:
 {context}
 
 Rules:
-- Friendly, clear, confident.
+- English only.
+- Be confident, clear, and helpful.
 """
 
     messages = [{"role": "system", "content": system_prompt}]
@@ -184,7 +185,7 @@ Rules:
 if "messages" not in st.session_state:
     st.session_state.messages = [{
         "role": "assistant",
-        "content": "👋✨ **Hey there!**\n\nI’m your **Afaque & Dheeraj Chatbot** 🦄💬\nAsk me anything — PDF or general knowledge 🚀"
+        "content": "👋 Welcome!\n\nI’m the **Afaque & Dheeraj Chatbot**.\nAsk me anything based on the PDF or general knowledge."
     }]
 
 # ================= DISPLAY CHAT =================
@@ -193,13 +194,13 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # ================= INPUT =================
-user_input = st.chat_input("💬 Type your colourful question here...")
+user_input = st.chat_input("Type your question here...")
 
 if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
 
     with st.chat_message("assistant"):
-        with st.spinner("✨ Thinking magic..."):
+        with st.spinner("Thinking..."):
             reply = get_answer(user_input, st.session_state.messages)
         st.markdown(reply)
 
