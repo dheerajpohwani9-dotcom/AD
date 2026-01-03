@@ -3,166 +3,204 @@ import pdfplumber
 import requests
 import datetime
 
-# -------------------- BASIC SETUP --------------------
-st.set_page_config(page_title="A&D Chatbot", layout="centered")
+# ================= PAGE CONFIG =================
+st.set_page_config(
+    page_title="Afaque & Dheeraj Chatbot",
+    page_icon="🦄",
+    layout="centered",
+    initial_sidebar_state="expanded"
+)
 
+# ================= COLORFUL CSS =================
+st.markdown("""
+<style>
+.main {
+    background: linear-gradient(120deg, #ff6ec4, #7873f5, #42e695);
+}
+
+.header-box {
+    background: linear-gradient(90deg, #ff512f, #dd2476);
+    padding: 25px;
+    border-radius: 18px;
+    text-align: center;
+    color: white;
+    box-shadow: 0px 8px 25px rgba(0,0,0,0.3);
+    margin-bottom: 25px;
+}
+
+.header-title {
+    font-size: 40px;
+    font-weight: 900;
+}
+
+.header-sub {
+    font-size: 16px;
+    opacity: 0.95;
+}
+
+.stChatMessage {
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(12px);
+    border-radius: 18px;
+    padding: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+.sidebar-box {
+    background: linear-gradient(180deg, #00c6ff, #0072ff);
+    padding: 18px;
+    border-radius: 15px;
+    color: white;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# ================= SIDEBAR =================
+with st.sidebar:
+    st.markdown("<div class='sidebar-box'>", unsafe_allow_html=True)
+    st.markdown("## 🤖 Afaque & Dheeraj")
+    st.markdown("### ✨ Smart AI Chatbot")
+    st.markdown("---")
+    st.markdown("📘 **PDF Brain**")
+    st.markdown("⚡ **Groq LLaMA 3**")
+    st.markdown("🎨 **Colorful UI**")
+    st.markdown("🚀 **Fast & Smart**")
+    st.markdown("---")
+    st.markdown("💡 *Ask freely. Get smart answers.*")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# ================= HEADER =================
+st.markdown("""
+<div class="header-box">
+    <div class="header-title">🦄 Afaque & Dheeraj Chatbot</div>
+    <div class="header-sub">✨ Colourful • Smart • AI Powered • PDF Aware ✨</div>
+</div>
+""", unsafe_allow_html=True)
+
+# ================= CONFIG =================
 GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 PDF_PATH = "comapanypolicys.pdf"
 MODEL_NAME = "llama-3.1-8b-instant"
 
-
-# -------------------- LOAD + CHUNK PDF --------------------
+# ================= LOAD PDF =================
 @st.cache_data
-def load_chunks(max_chars: int = 600):
+def load_chunks(max_chars=600):
     text = ""
     with pdfplumber.open(PDF_PATH) as pdf:
         for page in pdf.pages:
-            tx = page.extract_text()
-            if tx:
-                text += tx + "\n"
+            t = page.extract_text()
+            if t:
+                text += t + "\n"
 
-    raw_parts = [p.strip() for p in text.split("\n") if p.strip()]
-    chunks = []
-    buf = ""
+    parts = [p.strip() for p in text.split("\n") if p.strip()]
+    chunks, buf = [], ""
 
-    for part in raw_parts:
-        if len(buf) + len(part) <= max_chars:
-            buf += " " + part
+    for p in parts:
+        if len(buf) + len(p) <= max_chars:
+            buf += " " + p
         else:
             chunks.append(buf.strip())
-            buf = part
+            buf = p
 
     if buf:
         chunks.append(buf.strip())
 
     return chunks
 
-
 pdf_chunks = load_chunks()
 
-
-# -------------------- SIMPLE RETRIEVAL --------------------
-def retrieve_context(query: str, top_k: int = 3):
-    q_words = set(query.lower().split())
+# ================= RETRIEVAL =================
+def retrieve_context(query, top_k=3):
+    q = set(query.lower().split())
     scored = []
 
     for ch in pdf_chunks:
-        ch_words = set(ch.lower().split())
-        score = len(q_words & ch_words)
-        if score > 0:
+        score = len(q & set(ch.lower().split()))
+        if score:
             scored.append((score, ch))
 
     if not scored:
         return ""
 
-    scored.sort(reverse=True, key=lambda x: x[0])
+    scored.sort(reverse=True)
     return "\n\n".join([c for _, c in scored[:top_k]])
 
-
-# -------------------- GROQ API CALL --------------------
+# ================= GROQ API =================
 def llama_chat(messages):
     url = "https://api.groq.com/openai/v1/chat/completions"
-
     headers = {
         "Authorization": f"Bearer {GROQ_API_KEY}",
         "Content-Type": "application/json",
     }
-
     payload = {
         "model": MODEL_NAME,
         "messages": messages,
         "temperature": 0.4,
     }
 
-    response = requests.post(url, json=payload, headers=headers)
-    result = response.json()
+    r = requests.post(url, json=payload, headers=headers)
+    data = r.json()
 
     try:
-        return result["choices"][0]["message"]["content"]
+        return data["choices"][0]["message"]["content"]
     except:
-        return "⚠️ Groq API Error:\n" + str(result)
+        return "🚨 **Oops! Groq API Error**\n\n" + str(data)
 
-
-# -------------------- RAG + UPDATED INFO (NO SEARCHING TEXT) --------------------
-def get_answer(question: str, history):
+# ================= ANSWER LOGIC =================
+def get_answer(question, history):
     context = retrieve_context(question)
-    today = datetime.datetime.now().strftime("%d %B %Y (%Y)")
-    pdf_strength = len(context.strip())
+    today = datetime.datetime.now().strftime("%d %B %Y")
 
-    if pdf_strength < 50:
-        # PDF does not contain relevant information → use AI updated knowledge
+    if len(context.strip()) < 50:
         system_prompt = f"""
-You are A&D ka Chatbot.
+You are 🌈 **Afaque & Dheeraj Chatbot**.
 
 Rules:
-- Give clear and direct answers.
-- Use your updated general knowledge (today = {today}).
-- Do NOT say anything about "searching", "checking", "researching", or "not knowing".
-- Never restrict information to the year 2023.
+- Be friendly, colourful, and confident.
+- Use updated knowledge (today: {today}).
+- Never say you are searching or outdated.
 """
     else:
-        # PDF has useful context → use it first, but allow updated info too
         system_prompt = f"""
-You are A&D Chatbot.
+You are 🌈 **Afaque & Dheeraj Chatbot**.
 
-Use the following PDF text as your main reference. 
-If updated information (today = {today}) is needed, include it naturally.
+Use this PDF context smartly and add updated info if needed.
 
 PDF Context:
----------------------
 {context}
----------------------
 
 Rules:
-- Provide confident and direct answers.
-- Do NOT say "I am searching" or "I am researching".
-- Never limit your knowledge to only 2023.
+- Friendly, clear, confident.
 """
 
-    # Build message list
     messages = [{"role": "system", "content": system_prompt}]
-    
-    for m in history[-6:]:
-        messages.append(m)
-
+    messages.extend(history[-6:])
     messages.append({"role": "user", "content": question})
 
     return llama_chat(messages)
 
-
-# -------------------- STREAMLIT UI --------------------
-st.title("🧠 A&D Chatbot")
-
+# ================= CHAT STATE =================
 if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {"role": "assistant",
-         "content": "HEY! 👋 A&D Chatbot here . "
-                    "How Can I Help You"}
-    ]
+    st.session_state.messages = [{
+        "role": "assistant",
+        "content": "👋✨ **Hey there!**\n\nI’m your **Afaque & Dheeraj Chatbot** 🦄💬\nAsk me anything — PDF or general knowledge 🚀"
+    }]
 
-# Display chat messages
+# ================= DISPLAY CHAT =================
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# User input
-user_input = st.chat_input("Ask Something...")
+# ================= INPUT =================
+user_input = st.chat_input("💬 Type your colourful question here...")
 
 if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
 
-    with st.chat_message("user"):
-        st.markdown(user_input)
-
     with st.chat_message("assistant"):
-        with st.spinner("Thinking..."):
-            answer = get_answer(user_input, st.session_state.messages)
-        st.markdown(answer)
+        with st.spinner("✨ Thinking magic..."):
+            reply = get_answer(user_input, st.session_state.messages)
+        st.markdown(reply)
 
-
-    st.session_state.messages.append({"role": "assistant", "content": answer})
-
-
-
-
-
+    st.session_state.messages.append({"role": "assistant", "content": reply})
