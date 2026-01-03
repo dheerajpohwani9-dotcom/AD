@@ -92,7 +92,7 @@ def get_answer(question: str, history):
     if pdf_strength < 50:
         # PDF does not contain relevant information → use AI updated knowledge
         system_prompt = f"""
-You are Z&J ka Chatbot.
+You are A&D ka Chatbot.
 
 Rules:
 - Give clear and direct answers.
@@ -161,6 +161,7 @@ if user_input:
 
 
     st.session_state.messages.append({"role": "assistant", "content": answer})
+
 
 
 
