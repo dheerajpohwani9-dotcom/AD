@@ -5,7 +5,7 @@ import datetime
 
 # ================= PAGE CONFIG =================
 st.set_page_config(
-    page_title="Afaque & Dheeraj Chatbot",
+    page_title="Akash Chatbot",
     page_icon="🤖",
     layout="centered",
     initial_sidebar_state="expanded"
@@ -58,7 +58,7 @@ st.markdown("""
 # ================= SIDEBAR =================
 with st.sidebar:
     st.markdown("<div class='sidebar-box'>", unsafe_allow_html=True)
-    st.markdown("## 🤖 Afaque & Dheeraj")
+    st.markdown("## 🤖 Akash")
     st.markdown("### Smart AI Chatbot")
     st.markdown("---")
     st.markdown("📄 PDF-Based Knowledge")
@@ -72,7 +72,7 @@ with st.sidebar:
 # ================= HEADER =================
 st.markdown("""
 <div class="header-box">
-    <div class="header-title">🤖 Afaque & Dheeraj Chatbot</div>
+    <div class="header-title">🤖 Akash Chatbot</div>
     <div class="header-sub">Colorful • Intelligent • AI-Powered • PDF-Aware</div>
 </div>
 """, unsafe_allow_html=True)
@@ -153,7 +153,7 @@ def get_answer(question, history):
 
     if len(context.strip()) < 50:
         system_prompt = f"""
-You are **Afaque & Dheeraj Chatbot**.
+You are **Akash Chatbot**.
 
 Rules:
 - Respond in clear, professional English only.
@@ -162,7 +162,7 @@ Rules:
 """
     else:
         system_prompt = f"""
-You are **Afaque & Dheeraj Chatbot**.
+You are **Akash Chatbot**.
 
 Use the following PDF context as the primary source.
 Include updated information when relevant.
@@ -185,7 +185,7 @@ Rules:
 if "messages" not in st.session_state:
     st.session_state.messages = [{
         "role": "assistant",
-        "content": "👋 Welcome!\n\nI’m the **Afaque & Dheeraj Chatbot**.\nAsk me anything based on the PDF or general knowledge."
+        "content": "👋 Welcome!\n\nI'm the **Akash Chatbot**.\nAsk me anything based on the PDF or general knowledge."
     }]
 
 # ================= DISPLAY CHAT =================
